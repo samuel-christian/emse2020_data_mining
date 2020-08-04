@@ -32,11 +32,8 @@ You can use the script, for example:
 node index --tags=javascript --key=KEY
 ```
 You can specify a key so you have more quota for like 10.000 requests/day. Without key, you only have quota 300 requests/day.
-
 Be careful the script will not stop fetching the data until there are no more pages in the returned response from the API.
-
 So, there is a possibility the script stops in between the process, only fetches 2-3 pages (because it maybe suspected as an attempt of throttling).
-
 When this happens, you restart the script again by entering `start_from` parameter start from the last page fetched.
 
 For example:
