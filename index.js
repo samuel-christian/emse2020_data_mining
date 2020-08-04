@@ -2,7 +2,6 @@
 const fs = require("fs");
 const api_fetch = require("node-fetch");
 const {argv} = require("yargs");
-const path = require("path");
 // parameters
 var times = parseInt(argv.times) || 1;
 var user_input_tag = argv.tags || "progressive-web-apps";

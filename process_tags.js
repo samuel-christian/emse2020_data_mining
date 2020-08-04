@@ -1,6 +1,5 @@
 const fs = require("fs");
 const {argv} = require("yargs");
-const path = require("path");
 // parameters
 var input_file = argv.file || "raw_data.json";
 var output_file = argv.output || "tags.json";
