@@ -29,46 +29,73 @@ and another contains how many time a tag appear.
 
 You can use the script, for example:
 ```
-node index --tags=javascript --times=4
+node index --tags=javascript --key=KEY
 ```
-It requests to the endpoints 4 times (1 page = 30 result) so total data is 120 questions that contains `javascript` tags in it.
+You can specify a key so you have more quota for like 10.000 requests/day. Without key, you only have quota 300 requests/day.
 
-Don't forget to run `npm install` before running the `node` command.
-It must have [`yargs`](https://github.com/yargs/yargs) and [`node-fetch`](https://github.com/node-fetch/node-fetch).
+Be careful the script will not stop fetching the data until there are no more pages in the returned response from the API.
 
-## File Outputs
-I provide a configuration file `last_page.json`. The program reads from this file to get the last page of the API url it fetches from.
+So, there is a possibility the script stops in between the process, only fetches 2-3 pages (because it maybe suspected as an attempt of throttling).
 
-So, for example if you run:
-
-```
-node index --times=100
-```
-
-it produces inside the `last_page.json`:
-
-```
-{
-  "last": 100
-}
-```
-
-Then, the next time you run again:
-```
-node index --times=10
-```
-or
-```
-node index
-```
-It starts from the API url with `page=101` based on `last_page.json` content. Now, it also appends to existing file `raw_data.json` and `tags.json`.
-You can also specify custom filename as you desire.
+When this happens, you restart the script again by entering `start_from` parameter start from the last page fetched.
 
 For example:
 ```
-node index --times=100 --tags=javascript --tag_file=tag_filename_without_json --raw_file=raw_filename_without_json
+Fetching from https://api.stackexchange.com/2.2/questions?tagged=javascripts&site=stackoverflow&page=20
+
+Fetching from https://api.stackexchange.com/2.2/questions?tagged=javascripts&site=stackoverflow&page=21
+
+Fetching from https://api.stackexchange.com/2.2/questions?tagged=javascripts&site=stackoverflow&page=22
 ```
-Please make sure to input the filename only without the extension.
+
+Then it stops. You need to manually restart the script again by running:
+
+```
+node index --tags=YOUR_TAG --key=KEY --start_from=23
+```
+
+Without the `start_from` parameter otherwise, the script will start fetching again from `page=1`.
+
+## Dependencies
+Don't forget to run `npm install` before running the script.
+- [`yargs`](https://github.com/yargs/yargs)
+- [`node-fetch`](https://github.com/node-fetch/node-fetch)
+
+## Further Data Extraction
+```node extract_data --limit=50 --file=YOUR_FILE_IN_JSON --output=YOUR_FILE_IN_JSON```
+
+Extract only the tags that mentioned in at least 50 questions. Default input file is `tags.json` and output file is `topic.json`
+
+```node extract_data2 --file=YOUR_FILE_IN_JSON --group=YOUR_FILE_IN_JSON```
+
+Group the extracted tags based on defined `group.json` file. Default input file is `topic.json` and output file is `topic_grouped.json`
+
+You can define your own `group.json` file based on the extracted `topic.json`.
+
+For example:
+```
+topic.json
+{
+  "progressive-web-apps": 3643,
+  "service-worker": 1007,
+  "web-applications": 104,
+  "javascript": 943,
+  "google-chrome": 309,
+  "android": 348
+}
+```
+
+```
+group.json
+{
+	"a": ["progressive-web-apps", "service-worker"],
+	"b": ["javascript", "google-chrome"],
+	"c": ["web-applications", "android"]
+}
+
+```
+
+This will group the `topic.json` into `a`, `b`, and `c` group, then sum up the counting. For example, `a` value is 4650 (because 3643 + 1007).
 
 ## License
 Obviously it's MIT. I'll just copy-paste the LICENSE here.
